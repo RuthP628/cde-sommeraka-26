@@ -181,3 +181,180 @@ in den reellen Zahlen: -/
 example (a b c : ℝ) : a * b * c = b * (a * c) := by {
   sorry
   }
+
+/-! ## Implications, applying forwards & backwards ## -/
+
+/- Wie wir bereits wissen, werden Implikationen in Lean durch `→` notiert.
+(Der Pfeil lässt ich durch \rightarrow im Editor eingeben). -/
+
+/-
+**Forwards Reasoning** beschreibt die Beweistechnik,
+von den Annahmen auszugehen und aus diesen solange neue Annahmen zu folgern,
+bis wir bei der zu beweisenden Aussage ankommen.
+In Lean geht das mit der Taktik `have`.
+
+Mit der Taktik `intro` können wir `A` als zusätzliche lokale Annahme einführen,
+wenn das Ziel von der Form `A → B` ist.
+
+`exact [insert hypothesis]` und `assumption` können verwendet werden, um einen Beweis zu beenden.
+-/
+
+example (p q : Prop) : ((p → q) ∧ p) → q := by
+  --intro h
+  --have h1 : p → q := h.1
+  --have h2 : p := h.2
+  --apply h1
+  --assumption
+  sorry
+
+example (p q r : Prop) (hq : p → q)
+    (hr : p → (q → r)) : p → r := by
+      sorry
+
+/- `specialize` kann verwendet werden, um eine Annahme
+auf eine andere Annahme des lokalen Kontextes anzuwenden. -/
+example (p q r : Prop) (hq : p → q) (hr : p → q → r) : p → r := by
+  --intro hp
+  --specialize hq hp
+  --specialize hr hp hq
+  --assumption
+  sorry
+
+/- Die `apply`-Taktik ist sehr ähnlich zu `specialize`.
+
+Um den Unterschied zwischen den beiden Taktiken zu verstehen, nehmen wir an,
+wir haben die beiden Hypothesen `h₁ : p` und `h₂ : p → q` im lokalen Kontext.
+Dann lässt `specialize h₂ h₁` die Hypothese `h₁` unverändert und
+ändert die Hypothese `h₂` zu `q`.
+Währenddessen lässt `apply h₂ at h₁` die Hypothese `h₂` unverändert
+und verändert `h₁` zu `q`.
+-/
+
+example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
+  --intro hs hp
+  --apply hq at hp
+  --apply hp at hs
+  --apply hr at hs
+  --assumption
+  sorry
+
+/- Wir können mehrere Schritte in einer Zeile durchführen,
+indem wir unsere Kenntnisse zu Lambda Calculus nutzen: -/
+example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
+  --intro hs hp
+  --exact hr (hq hp hs)
+  sorry
+
+
+/-
+**Backwards reasoning** beschreibt die Beweistaktik,
+das Ziel solange umzuformen, bis man bei einer der Voraussetzungen ankommt.
+
+Hierfür können wir wieder die `apply`-Taktik nutzen:
+Angenommen, unser Ziel ist von der Form `B`
+und eine unserer Voraussetzungen ist von der Form `h : A → B`.
+Dann können wir `apply h` schreiben, um unser Ziel zu `A` zu ändern.
+
+Achtung: dies garantiert natürlich nicht, dass unser Ziel anschließend immer noch
+aus den Voraussetzungen folgt.
+
+Beispielsweise folgt aus der falschen Aussage `False`, jede beliebige Aussage,
+aber sofern unsere Voraussetzungen nicht widersprüchlich sind,
+werden wir nie `False` beweisen können (dazu später mehr).
+-/
+
+example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
+  --intro hs hp
+  --apply hr
+  --have h : s → q := by apply hq; exact hp
+  --apply h
+  --assumption
+  sorry
+
+#check le_of_lt
+
+example (n : ℕ) (h : n ≤ 5) : n ≤ 5 := by
+  -- apply le_of_lt
+  -- dead end
+  sorry
+
+/-
+**Unterschiede zwischen `rw` und `apply`**
+- `rw` kann genutzt werden, um die linke Seite einer Hypothese *irgendwo* im Ziel zu ersetzen,
+  Währenddessen muss der `apply` das gesamte Ziel verändern, um anwendbar zu sein.
+- *Im Allgemeinen* verwendet man `rw` für Gleichungen
+  und `apply` für Implikationen und "for all"-statements.
+-/
+
+/- **Negation** -/
+
+/- Die Negation `¬ A` steht für `A → False`,
+wobei `False` eine Aussage ohne Beweis ist.
+
+Für Negationen können wir dieselben Taktiken benutzen wie für Implikationen:
+Um eine Negation zu beweisen, können wir `intro` verwenden,
+und um eine Negation zu verwenden, können wir `apply` verwenden. -/
+
+example {p : Prop} (h : p) : ¬ ¬ p := by
+  --intro h'
+  --apply h'
+  --assumption
+  sorry
+
+-- *TODO*: Copy the following example to the file about quantifiers
+/-
+example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by {
+  --constructor
+  --· intro h x hx
+  --  apply h
+  --  use x
+  --· intro h h2
+  --  obtain ⟨x, hx⟩ := h2
+  --  exact h x hx
+  sorry
+  }
+-/
+
+/- Die Taktik `exfalso` (steht für "ex falso quod libet", d.h. "aus Falschem folgt beliebiges")
+kann verwendet werden, um zu beweisen, aus `False` jede beliebige andere Aussage folgt.
+
+Anwenden der Taktik `exfalso` ersetzt das Ziel durch `False`,
+d.h. nun muss gezeigt werden, dass die Annahmen widersprüchlich sind.-/
+
+example {p : Prop} (h : ¬ p) : p → 0 = 1 := by {
+  -- intro h2
+  -- exfalso
+  -- exact h h2
+  sorry
+  }
+
+/- `contradiction` proves any goal
+when two hypotheses are contradictory. -/
+example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
+  --intro hp
+  --contradiction
+  sorry
+
+/-
+**Aufgaben zu rw und Implikationen**
+ -/
+
+/- Die folgende Aussage ist überraschend schwierig, überspringt sie gerne, wenn ihr wollt.
+
+Falls ihr sie doch versuchen wollt, könnte das folgende Lemma hilfreich sein.
+
+Allerdings gibt es mehrere Wege, die Aussage zu beweisen,
+wundert euch nicht, wenn ihr das Lemma nicht braucht.-/
+
+#check mul_eq_zero.1
+
+
+example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 := by
+  have h3 : a - b + 3 * b = 4 := by rw [← h1]; ring
+  rw [h2] at h3
+
+  sorry
+
+example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by {
+    sorry
+  }
