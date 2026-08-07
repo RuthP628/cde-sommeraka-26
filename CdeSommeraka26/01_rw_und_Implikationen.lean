@@ -76,11 +76,10 @@ example (a b : ℚ) :
 
 /- Betrachte den folgenden Beweis:-/
 
-example (a b c d e : ℝ) (h : a = b + c) (h' : b = d - e) : a + e = d + c := by {
+example (a b c d e : ℝ) (h : a = b + c) (h' : b = d - e) : a + e = d + c := by
   rw [h]
   rw [h']
   ring
-  }
 
 /-
 Beachte: die Taktik `rw` verändert das aktuelle Ziel. Nach der ersten Zeile im Beweis oben
@@ -178,9 +177,8 @@ in den reellen Zahlen: -/
 #check (mul_assoc : ∀ a b c : ℝ, a * b * c = a * (b * c))
 #check (mul_comm : ∀ a b : ℝ, a * b = b * a)
 
-example (a b c : ℝ) : a * b * c = b * (a * c) := by {
+example (a b c : ℝ) : a * b * c = b * (a * c) := by
   sorry
-  }
 
 /-! ## Implications, applying forwards & backwards ## -/
 
@@ -303,7 +301,7 @@ example {p : Prop} (h : p) : ¬ ¬ p := by
 
 -- *TODO*: Copy the following example to the file about quantifiers
 /-
-example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by {
+example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
   --constructor
   --· intro h x hx
   --  apply h
@@ -312,7 +310,6 @@ example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
   --  obtain ⟨x, hx⟩ := h2
   --  exact h x hx
   sorry
-  }
 -/
 
 /- Die Taktik `exfalso` (steht für "ex falso quod libet", d.h. "aus Falschem folgt beliebiges")
@@ -321,12 +318,12 @@ kann verwendet werden, um zu beweisen, aus `False` jede beliebige andere Aussage
 Anwenden der Taktik `exfalso` ersetzt das Ziel durch `False`,
 d.h. nun muss gezeigt werden, dass die Annahmen widersprüchlich sind.-/
 
-example {p : Prop} (h : ¬ p) : p → 0 = 1 := by {
+example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
   -- intro h2
   -- exfalso
   -- exact h h2
   sorry
-  }
+
 
 /- `contradiction` proves any goal
 when two hypotheses are contradictory. -/
@@ -355,6 +352,5 @@ example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 := by
 
   sorry
 
-example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by {
+example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by
     sorry
-  }
