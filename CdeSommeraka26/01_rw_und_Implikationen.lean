@@ -323,8 +323,8 @@ example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
   sorry
 
 
-/- `contradiction` proves any goal
-when two hypotheses are contradictory. -/
+/- `contradiction` beweist das Ziel unter der Annahme,
+dass die lokalen Voraussetzungen einen Widerspruch enthalten. -/
 example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
   --intro hp
   --contradiction
