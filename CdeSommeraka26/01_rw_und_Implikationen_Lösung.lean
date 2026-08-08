@@ -105,7 +105,8 @@ Um die lokalen Hypothesen zu verwenden, braucht ihr `rw`, da `ring` diese nicht 
 -/
 
 example (a b c d : ℝ) (h : b = d + d) (h' : a = b + c) : a + b = c + 4 * d := by
-  sorry
+  rw [h', h]
+  ring
 
 /- Beachte: `rw` nimmt immer die linke Seite von Hypothesen und ersetzt sie durch die rechte Seite.
 Aber was, wenn in unserem Ziel nur die rechte Seite einer Annahme vorkommt?
@@ -143,7 +144,7 @@ Hierbei bezeichnet `exp x` die Exponentialfunktion auf den reellen Zahlen (d.h. 
 #check exp_add
 
 example (a b c : ℝ) : exp (a + b + c) = exp a * exp b * exp c := by
-  sorry
+  rw [exp_add, exp_add]
 
 /-
 Beachte: Nach dem zweiten `rw` ist das Ziel
@@ -163,11 +164,10 @@ Hier könnte es nützlich sein, `rw` mit der rechten Seite eines Lemmas zu verwe
 #check exp_zero
 
 example (a b c : ℝ) : exp (a + b - c) = (exp a * exp b) / (exp c * exp 0) := by
-  sorry
-
+  rw [exp_sub, exp_add, exp_zero]
+  ring
 
 /- Beweise die folgende Gleichung mit `rw`. Benutze nicht `ring`!
-Hier könnte die `nth_rewrite`-Taktik nützlich sein.
 
 Die folgenden beiden Lemmata beschreiben die Assoziativität und Kommutativität der Multiplikation
 in den reellen Zahlen: -/
@@ -176,7 +176,8 @@ in den reellen Zahlen: -/
 #check (mul_comm : ∀ a b : ℝ, a * b = b * a)
 
 example (a b c : ℝ) : a * b * c = b * (a * c) := by
-  sorry
+  rw [mul_comm a b]
+  rw [mul_assoc]
 
 /-! ## Implications, applying forwards & backwards ## -/
 
@@ -196,25 +197,26 @@ wenn das Ziel von der Form `A → B` ist.
 -/
 
 example (p q : Prop) : ((p → q) ∧ p) → q := by
-  --intro h
-  --have h1 : p → q := h.1
-  --have h2 : p := h.2
-  --apply h1
-  --assumption
-  sorry
+  intro h
+  have h1 : p → q := h.1
+  have h2 : p := h.2
+  apply h1
+  assumption
 
 example (p q r : Prop) (hq : p → q)
     (hr : p → (q → r)) : p → r := by
-      sorry
+      intro hp
+      have h1 : q := hq hp
+      have h2 : q → r := hr hp
+      exact h2 h1
 
 /- `specialize` kann verwendet werden, um eine Annahme
 auf eine andere Annahme des lokalen Kontextes anzuwenden. -/
 example (p q r : Prop) (hq : p → q) (hr : p → q → r) : p → r := by
-  --intro hp
-  --specialize hq hp
-  --specialize hr hp hq
-  --assumption
-  sorry
+  intro hp
+  specialize hq hp
+  specialize hr hp hq
+  assumption
 
 /- Die `apply`-Taktik ist sehr ähnlich zu `specialize`.
 
@@ -227,20 +229,17 @@ und verändert `h₁` zu `q`.
 -/
 
 example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
-  --intro hs hp
-  --apply hq at hp
-  --apply hp at hs
-  --apply hr at hs
-  --assumption
-  sorry
+  intro hs hp
+  apply hq at hp
+  apply hp at hs
+  apply hr at hs
+  assumption
 
 /- Wir können mehrere Schritte in einer Zeile durchführen,
 indem wir unsere Kenntnisse zu Lambda Calculus nutzen: -/
 example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
-  --intro hs hp
-  --exact hr (hq hp hs)
-  sorry
-
+  intro hs hp
+  exact hr (hq hp hs)
 
 /-
 **Backwards reasoning** beschreibt die Beweistaktik,
@@ -260,19 +259,16 @@ werden wir nie `False` beweisen können (dazu später mehr).
 -/
 
 example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
-  --intro hs hp
-  --apply hr
-  --have h : s → q := by apply hq; exact hp
-  --apply h
-  --assumption
-  sorry
+  intro hs hp
+  apply hr
+  have h : s → q := by apply hq; exact hp
+  apply h
+  assumption
 
 #check le_of_lt
 
 example (n : ℕ) (h : n ≤ 5) : n ≤ 5 := by
-  -- apply le_of_lt
-  -- dead end
-  sorry
+  exact h
 
 /-
 **Unterschiede zwischen `rw` und `apply`**
@@ -292,10 +288,9 @@ Um eine Negation zu beweisen, können wir `intro` verwenden,
 und um eine Negation zu verwenden, können wir `apply` verwenden. -/
 
 example {p : Prop} (h : p) : ¬ ¬ p := by
-  --intro h'
-  --apply h'
-  --assumption
-  sorry
+  intro h'
+  apply h'
+  assumption
 
 -- *TODO*: Copy the following example to the file about quantifiers
 /-
@@ -317,22 +312,20 @@ Anwenden der Taktik `exfalso` ersetzt das Ziel durch `False`,
 d.h. nun muss gezeigt werden, dass die Annahmen widersprüchlich sind.-/
 
 example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
-  -- intro h2
-  -- exfalso
-  -- exact h h2
-  sorry
-
+  intro h2
+  exfalso
+  exact h h2
 
 /- `contradiction` proves any goal
 when two hypotheses are contradictory. -/
 example {p : Prop} (h : ¬ p) : p → 0 = 1 := by
-  --intro hp
-  --contradiction
-  sorry
+  intro hp
+  contradiction
 
 /-
 **Aufgaben zu rw und Implikationen**
- -/
+-/
+
 /- Die folgende Aussage ist überraschend schwierig, überspringt sie gerne, wenn ihr wollt.
 
 Falls ihr sie doch versuchen wollt, könnte die Taktik `simp` hilfreich sein.
@@ -350,9 +343,28 @@ dieselbe Vereinfachung durchführen.
 `simp at [Hypothese]` formt nur eine der Hypothesen im lokalen Kontext um,
 `simp_all` vereinfacht das Ziel und alle Hypothesen im lokalen Kontext.-/
 
-
 example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 := by
-  sorry
+  have h3 : (a + 2 * b) + 2 * (a - b) = 6 := by {
+    rw [h1, h2]
+    ring
+  }
+  ring_nf at h3
+  have h4 : a * 3 - 6 = 0 := by
+    rw [h3]
+    ring
+  have h5 : a * 3 - 2 * 3 = 0 := by
+    rw [← h4]
+    ring
+  have h6 : (a - 2) * 3 = 0 := by
+    rw [← h5]
+    ring
+  simp only [mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h6
+  have h7 : a - 2 + 2 = 2 := by
+    rw [h6]
+    ring
+  rw [← h7]
+  ring
 
 example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by
-    sorry
+  rw [← h1]
+  ring
