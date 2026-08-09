@@ -8,7 +8,7 @@ Um lokal an diesem Projekt zu arbeiten, führe die folgenden Schritte aus:
 
 2. Gib nun den folgenden Command im Terminal ein:
   ```
-   git clone github.com/RuthP628/cde-sommeraka-26
+   git clone https://github.com/RuthP628/cde-sommeraka-26
 ```
 
 3. Nun sollte dein Computer eigenständig einen Ordner namens cde-sommeraka-26 erstellt haben. Navigiere nun mithilfe des folgenden Commands in diesen Ordner:
