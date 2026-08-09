@@ -1,1 +1,6 @@
-import CdeSommeraka26.Basic
+import CdeSommeraka26.«01_rw_und_Implikationen_Lösung»
+import CdeSommeraka26.«01_rw_und_Implikationen»
+import CdeSommeraka26.«02_Konjunktionen_und_Disjunktionen_Lösung»
+import CdeSommeraka26.«02_Konjunktionen_und_Disjunktionen»
+import CdeSommeraka26.«03_Quantoren_Lösung»
+import CdeSommeraka26.«03_Quantoren»
