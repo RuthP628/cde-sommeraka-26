@@ -72,15 +72,13 @@ example (hxs : x ∈ s) : x ∈ s ∪ t := by
 
 #check subset_def
 
-example : s ∩ t ⊆ s ∩ (t ∪ u) := by {
-  -- intro x hx
-  -- obtain ⟨hxs, hxt⟩ := hx
-  -- constructor
-  -- · assumption
-  -- · left
-  --  assumption
-  sorry
-  }
+example : s ∩ t ⊆ s ∩ (t ∪ u) := by
+  intro x hx
+  obtain ⟨hxs, hxt⟩ := hx
+  constructor
+  · assumption
+  · left
+    assumption
 
 /- ## Gleichheit von Mengen
 
@@ -94,14 +92,13 @@ für eine neue Variable `x` des richtigen Typs.
 #check (subset_antisymm : s ⊆ t → t ⊆ s → s = t)
 
 example : s ∩ t = t ∩ s := by
-  -- ext x
-  -- constructor
-  -- · intro hx
-  --   simp at hx
-  --   exact ⟨hx.2, hx.1⟩
-  -- · intro hx
-  --   exact ⟨hx.2, hx.1⟩
-  sorry
+  ext x
+  constructor
+  · intro hx
+    simp only [mem_inter_iff] at hx
+    exact ⟨hx.2, hx.1⟩
+  · intro hx
+    exact ⟨hx.2, hx.1⟩
 
 -- Die Taktik `ext` kann man auch für Funktionen verwenden:
 -- `(f = g) ↔ ∀ x, f x = g x`
@@ -109,9 +106,9 @@ example : s ∩ t = t ∩ s := by
 
 /- Durch Library Search kann man existierende Lemmata über Mengen finden: -/
 example : (s ∪ tᶜ) ∩ t = s ∩ t := by
-  have h₁ : (s ∪ tᶜ) ∩ t = (s ∩ t) ∪ (tᶜ ∩ t) := by rw?
-  have h₂ : (s ∩ t) ∪ (tᶜ ∩ t) = s ∩ t ∪ ∅ := by rw?
-  have h₃ : s ∩ t ∪ ∅ = s ∩ t := by rw?
+  have h₁ : (s ∪ tᶜ) ∩ t = (s ∩ t) ∪ (tᶜ ∩ t) := by rw [@union_inter_distrib_right]
+  have h₂ : (s ∩ t) ∪ (tᶜ ∩ t) = s ∩ t ∪ ∅ := by rw [@compl_inter_self]
+  have h₃ : s ∩ t ∪ ∅ = s ∩ t := by rw [@union_empty]
   rw [h₁, h₂, h₃]
 
 
@@ -169,34 +166,55 @@ example (f : α → β) (s : Set α) : f '' s = { y : β | ∃ x ∈ s, f x = y 
 
 
 example {s : Set α} {t : Set β} {f : α → β} : f '' s ⊆ t ↔ s ⊆ f ⁻¹' t := by
-  --constructor
-  --· intro h x hx
-  --  have hx' : f x ∈ f '' s := by exact mem_image_of_mem f hx
-  --  apply h at hx'
-  --  exact hx'
-  --· intro h x hx
-  --  have hx' : ∃ y ∈ s, f y = x := by exact hx
-  --  obtain ⟨ y, hy₁, hy₂ ⟩ := hx'
-  --  rw [← hy₂]
-  --  apply h at hy₁
-  --  exact hy₁
-  sorry
+  constructor
+  · intro h x hx
+    have hx' : f x ∈ f '' s := by exact mem_image_of_mem f hx
+    apply h at hx'
+    exact hx'
+  · intro h x hx
+    have hx' : ∃ y ∈ s, f y = x := by exact hx
+    obtain ⟨ y, hy₁, hy₂ ⟩ := hx'
+    rw [← hy₂]
+    apply h at hy₁
+    exact hy₁
 
 /- **Aufgaben** -/
 
 /- Zeige die folgenden Aussagen über Mengen: -/
 
-example {f : β → α} : f '' (f ⁻¹' s) ⊆ s := by {
-   sorry
-  }
+example {f : β → α} : f '' (f ⁻¹' s) ⊆ s := by
+    intro x hx
+    have hx₁ : ∃ y ∈ f ⁻¹' s, f y = x := by exact hx
+    obtain ⟨ y, hy₁, hy₂ ⟩ := hx₁
+    rw [← hy₂]
+    exact hy₁
 
-example {f : β → α} (h : Surjective f) : s ⊆ f '' (f ⁻¹' s) := by {
-   sorry
-  }
+example {f : β → α} (h : Surjective f) : s ⊆ f '' (f ⁻¹' s) := by
+  unfold Surjective at h
+  intro x hx
+  specialize h x
+  obtain ⟨ y, hy ⟩ := h
+  have hy' : y ∈ f ⁻¹' s := by rw [← hy] at hx; exact hx
+  rw [← hy]
+  exact mem_image_of_mem f hy'
 
-example {f : α → β} (h : Injective f) : f '' s ∩ f '' t ⊆ f '' (s ∩ t) := by {
-    sorry
-  }
+example {f : α → β} (h : Injective f) : f '' s ∩ f '' t ⊆ f '' (s ∩ t) := by
+    unfold Injective at h
+    intro x hx
+    obtain ⟨ hx₁, hx₂ ⟩ := hx
+    have hx₁' : ∃ y ∈ s, f y = x := by exact hx₁
+    have hx₂' : ∃ y ∈ t, f y = x := by exact hx₂
+    obtain ⟨ y₁, hy₁, hy₁' ⟩ := hx₁'
+    obtain ⟨ y₂, hy₂, hy₂' ⟩ := hx₂'
+    have hy : f y₁ = f y₂ := by rw [hy₂']; exact hy₁'
+    apply h at hy
+    use y₁
+    constructor
+    · constructor
+      · exact hy₁
+      · rw [hy]
+        exact hy₂
+    · exact hy₁'
 
 /- Wir wollen nun den Satz von Cantor beweisen:
 
@@ -204,6 +222,21 @@ Es gibt keine surjektive Funktion von einer Menge in ihre Potenzmenge.
 Tipp: Nutze `let R := {x | x ∉ f x}`, um die Menge `R` zu betrachten,
 die alle `x` enthält, die nicht in ihrem Bild unter `f` liegen.
 -/
-lemma exercise_cantor (α : Type*) (f : α → Set α) : ¬ Surjective f := by {
-  sorry
-  }
+lemma exercise_cantor (α : Type*) (f : α → Set α) : ¬ Surjective f := by
+  by_contra h
+  unfold Surjective at h
+  let R := { x | x ∉ f x}
+  specialize h R
+  obtain ⟨ x, hx ⟩ := h
+  unfold R at hx
+  by_cases h₁ : x ∈ f x
+  · have h₂ : x ∉ f x := by
+      rw [hx]
+      simp only [mem_ofPred_eq, not_not]
+      exact h₁
+    contradiction
+  · have h₂ : x ∈ f x := by
+      rw [hx]
+      simp only [mem_ofPred_eq]
+      exact h₁
+    contradiction
