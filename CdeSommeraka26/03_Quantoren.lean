@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option linter.style.header false
+
 /- **Quantoren** -/
 
 /- ## Existenzquantoren -/

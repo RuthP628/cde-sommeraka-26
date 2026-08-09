@@ -1,5 +1,6 @@
 import Mathlib
 
+set_option linter.style.header false
 set_option linter.style.whitespace false
 
 /- **Konjunktionen & Iff**-/

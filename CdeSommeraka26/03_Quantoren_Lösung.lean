@@ -1,5 +1,7 @@
 import Mathlib
 
+set_option linter.style.header false
+
 /- **Quantoren** -/
 
 /- ## Existenzquantoren -/
@@ -92,7 +94,7 @@ example (p q : Prop) (h : ¬q → ¬p) : p → q := by
   by_contra hq
   exact h hq hp
 
-example (p q r : Prop) (h1 : p → r) (h2 : ¬ p → r) : r := by
+example (p r : Prop) (h1 : p → r) (h2 : ¬ p → r) : r := by
   by_cases hp : p
   · exact h1 hp
   · exact h2 hp

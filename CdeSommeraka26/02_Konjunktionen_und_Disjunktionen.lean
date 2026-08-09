@@ -1,6 +1,7 @@
 import Mathlib
 
 set_option linter.style.whitespace false
+set_option linter.style.header false
 
 /- **Konjunktionen & Iff**-/
 /- In Lean wird die Konjunktion von zwei Aussagen `P` und `Q`
