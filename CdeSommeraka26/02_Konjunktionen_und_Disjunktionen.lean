@@ -23,15 +23,26 @@ kann man wie folgt vorgehen:
 * Wenn `h : P ↔ Q` eine Annahme ist, erhalten wir mit der Taktik `obtain ⟨hPQ, hQP⟩ := h`
   zwei neue lokale Annahmen `hPQ : P → Q` und `hQP : Q → P`. -/
 
+example (p q : Prop) (hp : p) (hq : q) : p ∧ q := by
+  constructor
+  · assumption
+  · assumption
+
+example (p q r : Prop) (hpq : p ∧ q) (hr : r) : p ∧ r := by
+  constructor
+  · obtain ⟨ hp, hq ⟩ := hpq
+    exact hp
+  · exact hr
+
+
 example (p q r s : Prop) (h : p → r) (h' : q → s) : p ∧ q → r ∧ s := by
-    -- intro hpq
-    -- obtain ⟨ hp, hq ⟩ := hpq
-    -- specialize h hp
-    -- specialize h' hq
-    -- constructor
-    -- · assumption
-    -- · assumption
-    sorry
+    intro hpq
+    obtain ⟨ hp, hq ⟩ := hpq
+    specialize h hp
+    constructor
+    · assumption
+    · specialize h' hq
+      assumption
 
 
 example (p q : Prop) : p ∧ q ↔ q ∧ p := by
@@ -55,17 +66,26 @@ Dies kreiert zwei Fälle, die nacheinander abgehandelt werden:
 einen Fall mit der Annahme `hP : P` und einen Fall mit der Annahme `hQ : Q`.
 -/
 
+example (p q : Prop) (hp : p) : p ∨ q := by
+  left
+  exact hp
+
+example (p q : Prop) (hpq : p ∨ q) : q ∨ p := by
+  obtain hp | hq := hpq
+  · right
+    exact hp
+  · left
+    exact hq
+
 variable (a b : ℝ)
 #check (mul_eq_zero : a * b = 0 ↔ a = 0 ∨ b = 0)
 
 example : a = a * b → a = 0 ∨ b = 1 := by
-  --intro h
-  --have h2 : a * (b - 1) = 0 := by linarith
-  --have h3 : a = 0 ∨ b - 1 = 0 := mul_eq_zero.1 h2
-  --obtain ha|hb := h3
-  --· left
-  --  exact ha
-  --· right
-    -- exact sub_eq_zero.1 hb
-  --  linarith
-  sorry
+  intro h
+  have h2 : a * (b - 1) = 0 := by linarith
+  have h3 : a = 0 ∨ b - 1 = 0 := mul_eq_zero.1 h2
+  obtain ha|hb := h3
+  · left
+    exact ha
+  · right
+    exact sub_eq_zero.1 hb

@@ -11,6 +11,7 @@ open Real
 def FermatsLastTheorem : Prop :=
   ∀ a b c n : ℕ, n ≥ 3 → a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c=0)
 
+
 /- D.h. `FermatsLastTheorem` ist der Name eines Objektes vom Typ `Prop` (Proposition).
 Das Objekt `FermatsLastTheorem` is definiert als `∀ a b c n : ℕ, n ≥ 3 → ¬ a^n + b^n = c^n`.
 Dies entspricht der mathematischen Aussage, dass für `a^n + b^n = c^n`
@@ -19,7 +20,9 @@ für alle natürlichen Zahlen `n ≥ 3` keine nichttrivialen Lösungen besitzt. 
 /- Wir können die Aussage auch als ein Theorem in Lean schreiben: -/
 
 theorem FermatsLastTheorem2 :
-  ∀ a b c n : ℕ, n ≥ 3 → a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c = 0) := sorry
+  ∀ a b c n : ℕ, n ≥ 3 → a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c = 0) := by
+    intro a b c n h
+    sorry
 
 /- In diesem Fall ist das Objekt `FermatsLastTheorem2` kein Objekt vom Typ `Prop`,
 sondern ein Objekt vom Typ `∀ a b c n : ℕ, n ≥ 3 → a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c = 0)`,
@@ -34,7 +37,11 @@ Dann gibt Lean eine Warnung aus, aber akzeptiert das Objekt als ein Objekt vom r
 
 /- Wir können die Aussage auch in der folgenden Form angeben: -/
 
-theorem FermatsLastTheorem3 {a b c n : ℕ} (h : n ≥ 3) : ¬ a^n + b^n = c^n := sorry
+theorem FermatsLastTheorem3 (a b c n : ℕ) (h : n ≥ 3) : a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c = 0) :=
+  sorry
+
+theorem FermatsLastTheorem4 : ∀ a b c n : ℕ, n ≥ 3 → a^n + b^n = c^n → (a = 0 ∨ b = 0 ∨ c = 0) :=
+  fun a b c n h ↦ (FermatsLastTheorem3 a b c n h)
 
 /- In diesem Fall sind `a`, `b`, `c` und `n` implizite Argumente
 und `h` ist ein explizites Argument vom Typ `n ≥ 3`.
@@ -58,15 +65,19 @@ Die drei einfachsten Taktiken sind:
 
 --Beispiele:
 
+#check ℝ
+
 example : 2 + 2 = 4 := by rfl
 example (n m : ℤ) : n + m = n + m := by rfl
+
+example : 2 * 3 = 6 := by rfl
 
 #check 0
 
 example (a b c : ℝ) : (a * b) * c = b * (a * c) := by
   ring
 
-example (a b : ℚ) :
+example (R : Type) [CommRing R] (a b : R) :
   (a - b) ^ 2 = a ^ 2 - 2 * a * b + b ^ 2 := by
     ring
 
@@ -143,7 +154,10 @@ Hierbei bezeichnet `exp x` die Exponentialfunktion auf den reellen Zahlen (d.h. 
 #check exp_add
 
 example (a b c : ℝ) : exp (a + b + c) = exp a * exp b * exp c := by
-  sorry
+  rw [add_assoc]
+  rw [exp_add a (b+c)]
+  rw [exp_add]
+  rw [mul_assoc]
 
 /-
 Beachte: Nach dem zweiten `rw` ist das Ziel
@@ -161,6 +175,15 @@ Hier könnte es nützlich sein, `rw` mit der rechten Seite eines Lemmas zu verwe
 
 #check exp_sub
 #check exp_zero
+
+#check add_comm
+#check add_assoc
+#check mul_comm
+#check mul_assoc
+#check zero_add
+#check add_zero
+#check mul_one
+#check one_mul
 
 example (a b c : ℝ) : exp (a + b - c) = (exp a * exp b) / (exp c * exp 0) := by
   sorry
@@ -196,25 +219,26 @@ wenn das Ziel von der Form `A → B` ist.
 -/
 
 example (p q : Prop) : ((p → q) ∧ p) → q := by
-  --intro h
-  --have h1 : p → q := h.1
-  --have h2 : p := h.2
-  --apply h1
-  --assumption
-  sorry
+  intro h
+  have h1 : p → q := h.1
+  have h2 : p := h.2
+  apply h1 at h2
+  assumption
 
 example (p q r : Prop) (hq : p → q)
     (hr : p → (q → r)) : p → r := by
-      sorry
+      intro hp
+      have hq' : q := hq hp
+      have hr' := hr hp hq'
+      exact hr'
 
 /- `specialize` kann verwendet werden, um eine Annahme
 auf eine andere Annahme des lokalen Kontextes anzuwenden. -/
 example (p q r : Prop) (hq : p → q) (hr : p → q → r) : p → r := by
-  --intro hp
-  --specialize hq hp
-  --specialize hr hp hq
-  --assumption
-  sorry
+  intro hp
+  specialize hq hp
+  specialize hr hp hq
+  assumption
 
 /- Die `apply`-Taktik ist sehr ähnlich zu `specialize`.
 
@@ -227,12 +251,11 @@ und verändert `h₁` zu `q`.
 -/
 
 example (p q r s : Prop) (hq : p → s → q) (hr : q → r) : s → p → r := by
-  --intro hs hp
-  --apply hq at hp
-  --apply hp at hs
-  --apply hr at hs
-  --assumption
-  sorry
+  intro hs hp
+  apply hq at hp
+  apply hp at hs
+  apply hr at hs
+  assumption
 
 /- Wir können mehrere Schritte in einer Zeile durchführen,
 indem wir unsere Kenntnisse zu Lambda Calculus nutzen: -/
@@ -298,17 +321,6 @@ example {p : Prop} (h : p) : ¬ ¬ p := by
   sorry
 
 -- *TODO*: Copy the following example to the file about quantifiers
-/-
-example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
-  --constructor
-  --· intro h x hx
-  --  apply h
-  --  use x
-  --· intro h h2
-  --  obtain ⟨x, hx⟩ := h2
-  --  exact h x hx
-  sorry
--/
 
 /- Die Taktik `exfalso` (steht für "ex falso quod libet", d.h. "aus Falschem folgt beliebiges")
 kann verwendet werden, um zu beweisen, aus `False` jede beliebige andere Aussage folgt.

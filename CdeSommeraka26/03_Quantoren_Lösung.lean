@@ -119,6 +119,15 @@ example {α : Type*} {p q : α → Prop} (h : ∀ x, p x → q x) :
     specialize h x hx
     use x
 
+example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
+  constructor
+  · intro h x hx
+    apply h
+    use x
+  · intro h h2
+    obtain ⟨x, hx⟩ := h2
+    exact h x hx
+
 example {α : Type*} {p : α → Prop} {r : Prop} :
     ((∃ x, p x) → r) ↔ (∀ x, p x → r) := by
     constructor

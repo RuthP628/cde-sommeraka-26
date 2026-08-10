@@ -89,6 +89,9 @@ example {p : ℝ → Prop} (h : ∀ x, p x) : ∃ x, p x := by {
   }
 
 
+example {α : Type*} {p : α → Prop} : ¬ (∃ x, p x) ↔ ∀ x, ¬ p x := by
+  sorry
+
 example {α : Type*} {p q : α → Prop} (h : ∀ x, p x → q x) :
     (∃ x, p x) → (∃ x, q x) := by {
     sorry
