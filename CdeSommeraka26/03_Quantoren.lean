@@ -17,7 +17,16 @@ nutzen wir `obtain ⟨x₀, hx₀⟩ := h`, um ein `x₀` zu erhalten, das `P` e
 
 example {α : Type*} {p : α → Prop} {r : Prop} :
     (∃ x, p x ∧ r) ↔ ((∃ x, p x) ∧ r) := by
-    sorry
+    constructor
+    · intro h
+      obtain ⟨ x₀, h₁, h₂ ⟩ := h
+      constructor
+      · use x₀
+      · assumption
+    · intro h
+      obtain ⟨ h₁, h₂ ⟩ := h
+      obtain ⟨ x₀, hx₀ ⟩ := h₁
+      use x₀
 
 lemma exists_distributes_over_or {α : Type*} {p q : α → Prop} :
     (∃ x, p x ∨ q x) ↔ (∃ x, p x) ∨ (∃ x, q x) := by {
@@ -65,22 +74,20 @@ können wir mithilfe der folgenden Taktiken das Gesetz vom ausgeschlossenen Drit
 * `push Not` kann verwendet werden, um Negationen "in den Scope von Quantoren hineinzuziehen"
 -/
 example (p q : Prop) (h : ¬q → ¬p) : p → q := by
-  -- intro hp
-  -- by_contra hq
-  -- exact h hq hp
-  sorry
+  intro hp
+  by_contra hq
+  apply h at hq
+  contradiction
 
 example (p q r : Prop) (h1 : p → r) (h2 : ¬ p → r) : r := by
-  -- by_cases hp : p
-  -- · exact h1 hp
-  -- · exact h2 hp
-  sorry
+  by_cases hp : p
+  · exact h1 hp
+  · exact h2 hp
 
 example {α : Type*} {p : α → α → Prop} :
     ¬ (∃ x y, p x y) ↔ ∀ x y, ¬ p x y := by
-  -- push Not
-  -- rfl
-  sorry
+  push Not
+  rfl
 
 /-  **Aufgaben**-/
 

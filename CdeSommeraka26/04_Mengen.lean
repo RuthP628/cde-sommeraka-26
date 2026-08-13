@@ -20,6 +20,7 @@ Lokale Annahmen der Form `s : Set α` kann man also verstehen als
 "`s` ist eine Menge, deren Elemente in `α` liegen"
 -/
 
+#check Set
 #check Set ℕ
 #check Set ℝ
 
@@ -72,15 +73,13 @@ example (hxs : x ∈ s) : x ∈ s ∪ t := by
 
 #check subset_def
 
-example : s ∩ t ⊆ s ∩ (t ∪ u) := by {
-  -- intro x hx
-  -- obtain ⟨hxs, hxt⟩ := hx
-  -- constructor
-  -- · assumption
-  -- · left
-  --  assumption
-  sorry
-  }
+example : s ∩ t ⊆ s ∩ (t ∪ u) := by
+  intro x hx
+  obtain ⟨hxs, hxt⟩ := hx
+  constructor
+  · assumption
+  · left
+    assumption
 
 /- ## Gleichheit von Mengen
 
@@ -94,14 +93,11 @@ für eine neue Variable `x` des richtigen Typs.
 #check (subset_antisymm : s ⊆ t → t ⊆ s → s = t)
 
 example : s ∩ t = t ∩ s := by
-  -- ext x
-  -- constructor
-  -- · intro hx
-  --   simp at hx
-  --   exact ⟨hx.2, hx.1⟩
-  -- · intro hx
-  --   exact ⟨hx.2, hx.1⟩
-  sorry
+  ext x
+  constructor
+  all_goals
+  intro hx
+  exact ⟨ hx.2, hx.1 ⟩
 
 -- Die Taktik `ext` kann man auch für Funktionen verwenden:
 -- `(f = g) ↔ ∀ x, f x = g x`
@@ -109,9 +105,9 @@ example : s ∩ t = t ∩ s := by
 
 /- Durch Library Search kann man existierende Lemmata über Mengen finden: -/
 example : (s ∪ tᶜ) ∩ t = s ∩ t := by
-  have h₁ : (s ∪ tᶜ) ∩ t = (s ∩ t) ∪ (tᶜ ∩ t) := by rw?
-  have h₂ : (s ∩ t) ∪ (tᶜ ∩ t) = s ∩ t ∪ ∅ := by rw?
-  have h₃ : s ∩ t ∪ ∅ = s ∩ t := by rw?
+  have h₁ : (s ∪ tᶜ) ∩ t = (s ∩ t) ∪ (tᶜ ∩ t) := by rw [@union_inter_distrib_right]
+  have h₂ : (s ∩ t) ∪ (tᶜ ∩ t) = s ∩ t ∪ ∅ := by rw [@compl_inter_self]
+  have h₃ : s ∩ t ∪ ∅ = s ∩ t := by rw [@union_empty]
   rw [h₁, h₂, h₃]
 
 
@@ -129,14 +125,14 @@ Insbesondere ergibt die `≠`- Relation in Lean nur für zwei Objekte vom selben
 # Set-builder notation
 -/
 
-def Evens : Set ℕ := {n : ℕ | Even n}
+def Evens := {n : ℕ | Even n}
 def Odds : Set ℕ := {n | Odd n}
 
 example : Evensᶜ = Odds := by {
   unfold Evens Odds
   ext n
-  simp only [mem_compl_iff, Set.mem_ofPred_eq, Nat.not_even_iff_odd]
-  }
+  simp only [mem_compl_iff, mem_ofPred_eq, Nat.not_even_iff_odd]
+}
 
 
 example : s ∩ t = {x | x ∈ s ∧ x ∈ t} := by rfl
@@ -169,24 +165,26 @@ example (f : α → β) (s : Set α) : f '' s = { y : β | ∃ x ∈ s, f x = y 
 
 
 example {s : Set α} {t : Set β} {f : α → β} : f '' s ⊆ t ↔ s ⊆ f ⁻¹' t := by
-  --constructor
-  --· intro h x hx
-  --  have hx' : f x ∈ f '' s := by exact mem_image_of_mem f hx
-  --  apply h at hx'
-  --  exact hx'
-  --· intro h x hx
-  --  have hx' : ∃ y ∈ s, f y = x := by exact hx
-  --  obtain ⟨ y, hy₁, hy₂ ⟩ := hx'
-  --  rw [← hy₂]
-  --  apply h at hy₁
-  --  exact hy₁
-  sorry
+  constructor
+  · intro h x hx
+    have hx' : f x ∈ f '' s := by exact mem_image_of_mem f hx
+    apply h at hx'
+    exact hx'
+  · intro h x hx
+    have hx' : ∃ y ∈ s, f y = x := by exact hx
+    obtain ⟨ y, hy₁, hy₂ ⟩ := hx'
+    rw [← hy₂]
+    apply h at hy₁
+    exact hy₁
 
 /- **Aufgaben** -/
 
 /- Zeige die folgenden Aussagen über Mengen: -/
 
 example {f : β → α} : f '' (f ⁻¹' s) ⊆ s := by {
+   unfold image
+   unfold preimage
+
    sorry
   }
 
@@ -195,7 +193,21 @@ example {f : β → α} (h : Surjective f) : s ⊆ f '' (f ⁻¹' s) := by {
   }
 
 example {f : α → β} (h : Injective f) : f '' s ∩ f '' t ⊆ f '' (s ∩ t) := by {
-    sorry
+    intro x hx
+    obtain ⟨ hx₁, hx₂ ⟩ := hx
+    obtain ⟨ y₁, hy₁, hy₁' ⟩ := hx₁
+    obtain ⟨ y₂, hy₂, hy₂' ⟩ := hx₂
+    rw [← hy₂'] at hy₁'
+    unfold Injective at h
+    apply h at hy₁'
+    use y₁
+    constructor
+    · constructor
+      · exact hy₁
+      · rw [hy₁']
+        exact hy₂
+    · rw [hy₁']
+      exact hy₂'
   }
 
 /- Wir wollen nun den Satz von Cantor beweisen:
