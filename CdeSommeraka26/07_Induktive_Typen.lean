@@ -265,98 +265,35 @@ def fibonacci : ℕ → ℕ
 
 /- `F_1 + F_3 + ... + F_{2 * (n - 1) + 1} = F_{2 * n}` -/
 example (n : ℕ) : ∑ i ∈ range n, fibonacci (2 * i + 1) = fibonacci (2 * n) := by
-  induction n with
-  | zero => simp; rfl
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih]
-    have h' : fibonacci ( 2 * n ) + fibonacci ( 2 * n + 1) = fibonacci (2 * n + 2) := by
-      rw [fibonacci]; ring
-    exact h'
+  sorry
 
 /- `F_1 + F_2 + ... + F_{n-1} = F_{n+2}` -> Als Beispiel zeigen! -/
 example (n : ℕ) : ∑ i ∈ range n, (fibonacci i : ℤ) = fibonacci (n + 1) - 1 := by
-  induction n with
-  | zero => rw [fibonacci]; simp
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih]
-    have h' : fibonacci (n + 1) + fibonacci (n) = fibonacci (n+2) := by rw [fibonacci]
-    have h'' : ((fibonacci (n+1)) : ℤ) + ((fibonacci (n)) : ℤ) = ((fibonacci (n+2)): ℤ) := by
-      norm_cast
-    linarith
+  sorry
 
 /- Die Summe der Quadratzahlen bis `n^2` ist `n * (n + 1)  (2 * n + 1) / 6`. -/
 example (n : ℕ) : 6 * ∑ i ∈ range (n + 1), i ^ 2 = n * (n + 1) * (2 * n + 1) := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [Finset.sum_range_succ]
-    rw [left_distrib, ih]
-    ring
+  sorry
 
 /- Für alle natürlichen Zahlen `n` gilt `2^n ≤ (n + 1)!` -/
 theorem pow_two_le_fac (n : ℕ) : 2 ^ n ≤ fac (n + 1) := by
-  induction n with
-  | zero => rw [fac, fac]; simp
-  | succ n ih =>
-    calc
-    2^ (n+1) = 2^n * 2 := by rfl
-    _ ≤ fac (n+1) * 2 := by exact Nat.mul_le_mul_right 2 ih
-    _ ≤ fac (n+1) * n + fac (n+1) * 2 := Nat.le_add_left (fac (n + 1) * 2) (fac (n + 1) * n)
-    _ = fac (n+1) * (n+2) := by ring
-    _ = fac (n+2) := by nth_rewrite 2 [fac]; ring
+  sorry
 
 /- `n! = 1 * 2 * ... * n` -/
 example (n : ℕ) : fac n = ∏ i ∈ range n, (i + 1) := by
-  induction n with
-  | zero => rw[fac]; simp
-  | succ n ih =>
-    rw [fac, ih]
-    rw [mul_comm]
-    rw [prod_range_succ]
+  sorry
 
 /- *Gauß'sche Summenformel* : Die Summe der natürlichen Zahlen `≤ n` ist `n * (n + 1)/2`. -/
 lemma gauss : ∀ (m : ℕ), (∑ i ∈ range (m + 1), (i : ℚ) = m * (m + 1) / 2) := by
-    intro m
-    induction m with
-  | zero => simp
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih]
-    field_simp
-    norm_cast
-    ring
+  sorry
 
 /- `∑_{i = 0}^{n} i^3 = (∑_{i=0}^{n} i) ^ 2`. -/
 lemma sum_cube_eq_sq_sum (n : ℕ) :
     (∑ i ∈ range (n + 1), (i : ℚ) ^ 3) = (∑ i ∈ range (n + 1), (i : ℚ)) ^ 2 := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [Finset.sum_range_succ, ih]
-    rw [gauss]
-    rw [gauss (n+1)]
-    field_simp
-    norm_cast
-    ring
+  sorry
 
 /- `(2 * n)! = n! * 2^n * (Produkt der ungeraden Zahlen < 2 * n)` -/
 example (n : ℕ) : fac (2 * n) = fac n * 2 ^ n * ∏ i ∈ range n, (2 * i + 1) := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    calc
-    fac (2 * (n + 1)) = fac ((2 * n + 1) + 1) := by ring_nf
-    _= fac (2 * n + 1) * (2 * n + 2) := by rw [fac]; ring
-    _= fac ( 2 * n ) * (2 * n + 1) * (2 * n + 2) := by rw [fac]; ring
-    _ = (fac n * 2 ^ n * ∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) * (2 * n + 2) := by
-      rw [ih]
-    _ = (fac n * 2^n * ∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) * (2 * n + 2 * 1) := by simp
-    _ = (fac n * 2^n * ∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) * (2 * (n+1)) := by ring
-    _ = fac n * (n+1) * 2^n * 2 * (∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) := by ring
-    _ = fac (n + 1) * 2^n * 2 * (∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) := by
-      rw [fac]; ring
-    _ = fac (n + 1) * (2^n * 2) * (∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) := by ring
-    _ = fac (n + 1) * 2^(n+1) * (∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1) := by rfl
-    _ = fac (n + 1) * 2^(n+1) * ((∏ i ∈ Finset.range n, (2 * i + 1)) * (2 * n + 1)) := by ring
-    _ = fac (n + 1) * 2^(n+1) * (∏ i ∈ Finset.range (n+1), (2 * i + 1)) := by rw [prod_range_succ]
+  sorry
 
 #min_imports

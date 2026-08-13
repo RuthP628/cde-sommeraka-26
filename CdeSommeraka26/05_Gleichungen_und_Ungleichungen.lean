@@ -26,11 +26,11 @@ wenn möglich immer `calc`-Umgebungen zu verwenden, auch wenn jeder `calc`-Bewei
 auch ausschließlich mit den Taktiken geführt werden kann, die wir bislang gesehen haben. -/
 
 example (h₀ : a = b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e := by
-  calc a
-      = b := h₀
-    _ < c := h₁
-    _ ≤ d := h₂
-    _ < e := h₃
+  calc
+  a = b := h₀
+  _ < c := h₁
+  _ ≤ d := h₂
+  _ < e := h₃
 
 /- Mit der Taktik `trans` können wir Ungleichungen beweisen, indem wir einen Term angeben,
 von dem wir behaupten, dass er zwischen den beiden Termen, deren Ungleichung wir zeigen wollen,
@@ -52,7 +52,6 @@ example (h₀ : a = b) (h₁ : b < c) (h₂ : c ≤ d) (h₃ : d < e) : a < e :=
 
 example (x y z : ℝ) (hx : x ≤ 3 * y) (h2 : ¬ y > 2 * z)
     (h3 : x ≥ 6 * z) : x = 3 * y := by
-  ring
   linarith
 
 
@@ -88,7 +87,9 @@ example (h : a = b) : c - exp b = c - exp a := by
 
 /-- Zeige die folgende Aussage: -/
 example (a b c : ℝ) : a + b ≤ c → a ≤ c - b := by {
-  sorry
+
+  intro
+  linarith
   }
 
 /- Hinweis: für reine Rechenaufgaben kann man `norm_num` verwenden
@@ -98,16 +99,16 @@ example (x : ℝ) : (1 + 1) * x + (7 ^ 2 - 35 + 1) = 2 * x + 15 := by norm_num
 
 /- Zeige die folgende Aussage mit `calc`. -/
 example {x y : ℝ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 := by
-  sorry
+    sorry
+
 
 /-- In manchen Fällen kann es nützlich sein,
 in Beweisen mit `gcongr` ein `+ 0` hinzuzufügen -/
 example {m n : ℤ} : n ≤ n + m ^ 2 := by
   -- gcongr doesn't make progress here
-  -- calc
-  --  n = n + 0 := by ring
-  --  _ ≤ n + m ^ 2 := by gcongr; exact sq_nonneg m
-  sorry
+  calc
+  n = n + 0 := by ring
+  _ ≤ n + m ^ 2 := by gcongr; exact sq_nonneg m
 
 /- Manchmal geht `congr`/`gcongr` zu weit in einen Term hinein.
 In diesen Fällen kann man `gcongr` Patterns vorgeben.
@@ -121,28 +122,36 @@ example {a₁ a₂ b₁ b₂ c₁ c₂ : ℝ} (hab : a₁ + a₂ = b₁ + b₂) 
 
 
 example (x : ℝ) (hx : x = 3) : x ^ 2 + 3 * x - 5 = 13 := by
-  sorry
+  rw[hx]
+  norm_num
+
 
 example {m n : ℤ} : n - m ^ 2 ≤ n + 3 := by
-  sorry
+  have  hsq : 0 ≤  m ^ 2 := by exact sq_nonneg m
+  calc
+  n - m ^ 2 ≤ n + 0 := by linarith
+  _ ≤ n+3 := by norm_num
+
 
 
 
 example {a₁ a₂ a₃ b₁ b₂ b₃ : ℝ} (h₁₂ : a₁ + a₂ + 1 ≤ b₁ + b₂) (h₃ : a₃ + 2 ≤ b₃) :
   exp (a₁ + a₂) + a₃ + 1 ≤ exp (b₁ + b₂) + b₃ + 1 := by {
-    -- gcongr ?_ +1
-    -- have h₆: (a₃ ≤ b₃ - 2) := by linarith
-    -- have h₇: (exp (a₁ + a₂) ≤ exp (b₁ + b₂)) := by
-    --  norm_num
-    --  linarith
-    --linarith
-    sorry
+    gcongr ?_ +1
+    have h₆: (a₃ ≤ b₃ - 2) := by linarith
+    have h₇: (exp (a₁ + a₂) ≤ exp (b₁ + b₂)) := by
+      norm_num
+      linarith
+    linarith
   }
 
 /-- `calc` funktioniert auch mit der Teilbarkeitsrelation statt mit Gleichheitszeichen.
 Zeige die folgende Aussage mit `calc`. -/
 lemma exercise_division (n m k l : ℕ) (h₁ : n ∣ m) (h₂ : m = k) (h₃ : k ∣ l) : n ∣ l := by
-  sorry
+  calc
+  n ∣ m := h₁
+  _ = k := h₂
+  _ ∣ l := h₃
 
 
 /-

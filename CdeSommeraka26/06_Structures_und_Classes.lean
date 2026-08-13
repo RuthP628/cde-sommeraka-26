@@ -93,7 +93,7 @@ def add (a b : Point) : Point where
   y := a.y + b.y
   z := a.z + b.z
 
-def add' : Point → Point → Point :=
+def add' : Point → (Point → Point) :=
   fun ⟨ux, uy, uz⟩ ⟨vx, vy, vz⟩ ↦ ⟨ux + vx, uy + vy, uz + vz⟩
 
 def add'' : Point → Point → Point
@@ -112,6 +112,8 @@ da `p` den Typ `Point` hat. -/
 #check myPoint1.add myPoint2
 #check (myPoint1.add myPoint2).1
 #eval (myPoint1.add myPoint2).1
+
+#eval 3+4
 
 end Point
 
@@ -154,6 +156,13 @@ example (a b : Point) : a + b = b + a := by {
 /- **Aufgabe**.
 Definiere Skalarmultiplikation einer reellen Zahl mit einem `Point` -/
 
+def sk_mul (sk : ℝ)(a : Point) : Point where
+  x := sk * a.x
+  y := sk * a.y
+  z := sk * a.z
+
+
+
 end Point
 
 /- **Aufgabe**
@@ -166,6 +175,35 @@ und zeige, dass Multiplikation eines pythagoräischen Tripels mit einer
 konstanten natürlichen Zahl ein weiteres pythagoräisches Tripel liefert.
 -/
 
+@[ext] structure PythagoreanTriple' where
+  a : ℕ
+  b : ℕ
+  c : ℕ
+  trip: a^2 + b^2 = c^2
+
+#check PythagoreanTriple'
+
+def trip1 : PythagoreanTriple' where
+  a := 3
+  b := 4
+  c := 5
+  trip := by norm_num
+
+namespace PythagoreanTriple'
+
+def mul_const (c : ℕ) (triple : PythagoreanTriple') : PythagoreanTriple' where
+  a := c * triple.a
+  b := c * triple.b
+  c := c * triple.c
+  trip := by
+    calc
+    (c * triple.a)^2 + (c * triple.b)^2 = c^2 * triple.a^2 + c^2 * triple.b^2 := by linarith
+    _ = c^2 * (triple.a^2 + triple.b^2) := by linarith
+    _ = c^2 * triple.c^2 := by rw [triple.trip]
+    _= (c * triple.c)^2 := by linarith
+
+end PythagoreanTriple'
+
 /- **Aufgabe**.
 Definiere die Struktur der "strikt bipunktierten Typen", d.h. einen Typen
 zusammen mit 2 verschiedenen Punkten `x₀ ≠ x₂`.
@@ -174,6 +212,25 @@ State und beweise außerdem das Lemma,
 dass für die Komponenten `x₀` und `x₁` eines beliebigen Elements `a`
 eines strikt bipunktierten Typen gilt:
 `∀ z, z ≠ x₀ ∨ z ≠ x₁.` -/
+
+structure StrictBipointedType (α : Type*) where
+  x0 : α
+  x1 : α
+  bipointed : x0 ≠ x1
+
+namespace StrictBipointedType
+
+example {α : Type*} (p : StrictBipointedType α) : ∀ z : α, z ≠ p.x0 ∨ z ≠ p.x1 := by
+  intro z
+  by_cases hz : z = p.x0
+  · right
+    have hx0 := p.bipointed
+    rw [← hz] at hx0
+    assumption
+  · left
+    assumption
+
+end StrictBipointedType
 
 /- Betrachte nun die folgende Struktur: -/
 
@@ -243,7 +300,7 @@ example (x : PosReal) : x.1 > 0 := x.2
 example (x : PosReal') : x.1 > 0 := x.2
 
 def PosPoint'' : Type :=
-  { x : ℝ × (ℝ × ℝ) // x.1 > 0 ∧ x.2.1 > 0 ∧ x.2.2 > 0 }
+  { x : ℝ × ℝ × ℝ // x.1 > 0 ∧ x.2.1 > 0 ∧ x.2.2 > 0 }
 
 
 /- Structures können von Parametern abhängen (→ dependent types!) -/
@@ -285,6 +342,7 @@ lemma AbelianGroup.zero_add (g : AbelianGroup) (x : g.G) :
     g.add g.zero x = x := by
   rw [g.comm, g.add_zero]
 
+#check add_comm
 
 /-
 Probleme mit diesem Ansatz:
@@ -307,14 +365,14 @@ class AbelianGroup' (G : Type*) where
   neg : G → G
   add_neg : ∀ x : G, add x (neg x) = zero
 
-instance some_name : AbelianGroup' ℤ where
+instance : AbelianGroup' ℤ where
   add := fun a b ↦ a + b
   comm := add_comm
   assoc := add_assoc
   zero := 0
   add_zero := by simp
   neg := fun a ↦ -a
-  add_neg := by exact?
+  add_neg := by exact fun x ↦ Int.add_right_neg x
 
 #eval AbelianGroup'.add (2 : ℤ) (5 : ℤ)
 
@@ -362,6 +420,13 @@ set_option trace.Meta.synthInstance true in
 Zeige, dass wenn `G` eine abelsche Gruppe ist,
 dann auch die Menge der Tripel aus Elementen von `G` eine abelsche Gruppe ist. -/
 
-example (G : Type*) [AbelianGroup' G] : AbelianGroup' (Triple G) := sorry
+instance (G : Type*) [AbelianGroup' G] : AbelianGroup' (Triple G) where
+  add a b:= ⟨a.x +' b.x, a.y +' b.y,a.z +' b.z⟩
+  comm a b := by ext <;> apply AbelianGroup'.comm
+  assoc a b c := by ext <;> apply AbelianGroup'.assoc
+  zero := ⟨𝟘, 𝟘, 𝟘⟩
+  add_zero a := by ext <;> apply AbelianGroup'.add_zero
+  neg a := ⟨ -' a.x, -' a.y,-' a.z ⟩
+  add_neg a := by ext <;> apply AbelianGroup'.add_neg
 
 #min_imports
